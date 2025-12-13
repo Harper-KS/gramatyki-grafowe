@@ -1,18 +1,21 @@
 from productions.production_base import Production
 
-class P0(Production):
-    """Production P0: Mark quadrilateral element for refinement.
-    It sets value of attribute R of the hyperedge with label Q to 1
+class P10(Production):
     """
+    Production P10: marks edges of hexagonal element,
+    marked for refinement, for breaking,
+    it sets value of attribute R of each hyperedge with label E to 1
+    """
+
 
     def __init__(self):
         super().__init__(
-            name="P0",
-            description="Mark quadrilateral element for refinement"
+            name="10",
+            description="Mark edges of hexagonal element for breaking"
         )
 
-    def can_apply(self, graph, hyperedge=None, refinement_criterion=True):
-        """Check if P0 can be applied to the graph.
+    def can_apply(self, graph, hyperedge=None):
+        """Check if P10 can be applied to the graph.
 
         Args:
             refinement_criterion: External condition (e.g., error estimate) to decide if element should be refined
@@ -23,31 +26,24 @@ class P0(Production):
             if not edge.is_hyperedge():
                 continue
 
-            # Check if it's a quadrilateral (label Q and 4 nodes)
-            if edge.label != "Q" or len(edge.nodes) != 4:
+            # Check if it's a quadrilateral (label Q and 6 nodes)
+            if edge.label != "S" or len(edge.nodes) != 6:
                 continue
 
-            # Check if R = 0 (not yet marked for refinement)
-            if edge.R != 0:
-                continue
 
-            # Check refinement criterion
-            if not refinement_criterion:
-                continue
-
-            # Find the 4 edges connecting the nodes
+            # Find the 6 edges connecting the nodes
             nodes = edge.nodes
             edges_found = []
 
-            for i in range(4):
+            for i in range(6):
                 node1 = nodes[i]
-                node2 = nodes[(i + 1) % 4]
+                node2 = nodes[(i + 1) % 6]
                 found_edge = graph.get_edge_between(node1, node2)
-                if found_edge is None:
+                if found_edge is None or found_edge.label != "E":
                     break
                 edges_found.append(found_edge)
 
-            if len(edges_found) == 4:
+            if len(edges_found) == 6:
                 return True, {
                     'hyperedge': edge,
                     'nodes': nodes,
@@ -57,17 +53,15 @@ class P0(Production):
         return False, None
 
     def apply(self, graph, matched_elements):
-        """Apply P0 to mark the quadrilateral for refinement."""
-        hyperedge = matched_elements['hyperedge']
+        """Apply P10 to mark the marked for refinement hexagonal edges for breaking."""
 
-        # Mark the hyperedge for refinement
-        hyperedge.R = 1
+        for e in matched_elements["edges"]:
+            e.R = 1
 
-        print(f"[{self.name}] Marked quadrilateral hyperedge for refinement (R: 0 -> 1)")
-        print(f"[{self.name}] Hyperedge: {hyperedge}")
+        print("Successfully applied P10! Marked edges for breaking.(E.R: 0 -> 1")
 
         return {
-            'marked_hyperedge': hyperedge,
+            'hyperedge': matched_elements["hyperedge"],
             'nodes': matched_elements['nodes'],
-            'edges': matched_elements['edges']
+            'marked_edges': matched_elements['edges']
         }

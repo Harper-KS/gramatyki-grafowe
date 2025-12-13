@@ -5,107 +5,84 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.insert(0, project_root)
 
 from hypergraph.hypergraph import HyperGraph
-from productions.p0.p0 import P0
+from productions.p9.p9 import P9
 
-output_dir = "./productions/p0/outputs"
+output_dir = "./productions/p9/outputs"
 os.makedirs(output_dir, exist_ok=True)
 
-# Test 1: Simple quadrilateral
+# Test 1: Simple hexagon
 
 graph1 = HyperGraph()
-production = P0()
+production = P9()
 
-n1 = graph1.add_node(0, 0)
-n2 = graph1.add_node(1, 0)
-n3 = graph1.add_node(1, 1)
-n4 = graph1.add_node(0, 1)
+coords = [(-3, 0), (-1.5, 2.6),(1.5, 2.6), (3, 0), (1.5, -2.6), (-1.5, -2.6)]
 
-graph1.add_edge(n1, n2, is_border=True)
-graph1.add_edge(n2, n3, is_border=True)
-graph1.add_edge(n3, n4, is_border=True)
-graph1.add_edge(n4, n1, is_border=True)
+n1, n2, n3, n4, n5, n6 = [
+    graph1.add_node(x, y)
+    for x, y in coords
+]
+borders = {(n1, n2), (n2, n3), (n3, n4), (n4, n5), (n5, n6), (n6, n1)}
+edges = []
+for i in borders:
+    e = graph1.add_edge(i[0], i[1])
+    e.R = 0
+    edges.append(e)
 
-q = graph1.add_hyperedge([n1, n2, n3, n4], label="Q")
-
+h = graph1.add_hyperedge([n1,n2,n3,n4,n5,n6], label="S")
+h.R = 0
 # Before
-graph1.visualize(os.path.join(output_dir, "example_p0_before.png"))
+graph1.visualize(os.path.join(output_dir, "example_p9_before.png"))
 
 can_apply, matched = production.can_apply(graph1)
 if can_apply:
     production.apply(graph1, matched)
 
-graph1.visualize(os.path.join(output_dir, "example_p0_after.png"))
+graph1.visualize(os.path.join(output_dir, "example_p9_after.png"))
 
-# Test 2: Quadrilateral embedded in larger structure
+# Test 2: Hexagon embedded in slightly larger structure (with two extra quadrilaterals)
 graph2 = HyperGraph()
-production2 = P0()
+production = P9()
 
-n1 = graph2.add_node(0, 0)
-n2 = graph2.add_node(1, 0)
-n3 = graph2.add_node(1, 1)
-n4 = graph2.add_node(0, 1)
 
-graph2.add_edge(n1, n2, is_border=True)
-graph2.add_edge(n2, n3, is_border=False)  # Shared edge
-graph2.add_edge(n3, n4, is_border=True)
-graph2.add_edge(n4, n1, is_border=True)
 
-q1 = graph2.add_hyperedge([n1, n2, n3, n4], label="Q")
+coords = [(-3, 0), (-1.5, 2.6),(1.5, 2.6), (3, 0), (1.5, -2.6), (-1.5, -2.6), (6, 2.6), (6,0), (6, -2.6)]
 
-n5 = graph2.add_node(2, 0)
-n6 = graph2.add_node(2, 1)
+n1, n2, n3, n4, n5, n6, n7, n8, n9 = [
+    graph2.add_node(x, y)
+    for x, y in coords
+]
+borders = {(n1, n2), (n2, n3), (n3, n7), (n7, n8), (n8, n9), (n9, n5), (n5, n6), (n6, n1)}
+inner = {(n4, n5), (n3, n4), (n4, n8)}
+edges = []
+for i in borders:
+    e = graph2.add_edge(i[0], i[1])
+    e.R = 0
+    edges.append(e)
 
-graph2.add_edge(n2, n5, is_border=True)
-graph2.add_edge(n5, n6, is_border=True)
-graph2.add_edge(n6, n3, is_border=True)
+for i in inner:
+    e = graph2.add_edge(i[0], i[1], is_border=False)
+    e.R = 0
+    edges.append(e)
 
-q2 = graph2.add_hyperedge([n2, n5, n6, n3], label="Q")
+h = graph2.add_hyperedge([n1,n2,n3,n4,n5,n6], label="S")
+h.R = 0
+
+
+
+q1 = graph2.add_hyperedge([n3,n4,n8,n7], label="Q")
+q2 = graph2.add_hyperedge([n4,n5,n9,n8], label="Q")
+q1.R =0
+q2.R =0
 
 # Before applying
-graph2.visualize(os.path.join(output_dir, "example_p0_larger_graph_before.png"))
+graph2.visualize(os.path.join(output_dir, "example_p9_larger_graph_before.png"))
 
 # Apply production (will mark one quadrilateral)
-can_apply, matched = production2.can_apply(graph2)
+can_apply, matched = production.can_apply(graph2)
 if can_apply:
-    production2.apply(graph2, matched)
+    production.apply(graph2, matched)
     matched_q = matched['hyperedge']
     other_q = q2 if matched_q == q1 else q1
 
 # After applying
-graph2.visualize(os.path.join(output_dir, "example_p0_larger_graph_after.png"))
-
-
-# Test 3: Verification of node positions
-print("\n3. Generating Test 3: Node position verification...")
-
-graph3 = HyperGraph()
-production3 = P0()
-
-# Create larger quadrilateral with specific coordinates
-n1 = graph3.add_node(0, 0)
-n2 = graph3.add_node(2, 0)
-n3 = graph3.add_node(2, 2)
-n4 = graph3.add_node(0, 2)
-
-graph3.add_edge(n1, n2, is_border=True)
-graph3.add_edge(n2, n3, is_border=True)
-graph3.add_edge(n3, n4, is_border=True)
-graph3.add_edge(n4, n1, is_border=True)
-
-q = graph3.add_hyperedge([n1, n2, n3, n4], label="Q")
-
-# Before
-graph3.visualize(os.path.join(output_dir, "example_p0_node_positions_before.png"))
-
-# Store coordinates before
-coords_before = [(n.x, n.y) for n in [n1, n2, n3, n4]]
-
-# Apply production
-can_apply, matched = production3.can_apply(graph3)
-if can_apply:
-    production3.apply(graph3, matched)
-
-# After
-coords_after = [(n.x, n.y) for n in [n1, n2, n3, n4]]
-
-graph3.visualize(os.path.join(output_dir, "example_p0_node_positions_after.png"))
+graph2.visualize(os.path.join(output_dir, "example_p9_larger_graph_after.png"))

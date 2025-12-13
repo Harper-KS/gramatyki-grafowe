@@ -100,6 +100,8 @@ class HyperGraph:
             Patch(facecolor='#FF3333', edgecolor='red', label='Hyperedge (R=1) - Marked'),
             Patch(facecolor='lightblue', edgecolor='black', label='Node'),
             Patch(facecolor='orange', edgecolor='black', label='Hanging Node'),
+            Patch(facecolor='green', edgecolor='black', label='Edge (R=1)'),
+
         ]
         plt.legend(handles=legend_elements, loc='upper right', fontsize=10)
 
