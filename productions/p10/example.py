@@ -60,7 +60,7 @@ for i in borders:
     edges.append(e)
 
 for i in inner:
-    e = graph2.add_edge(i[0], i[1], is_border=False)
+    e = graph2.add_edge(i[0], i[1], is_border=False, label="E")
     e.R = 0
     edges.append(e)
 
