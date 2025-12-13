@@ -100,8 +100,8 @@ class HyperGraph:
 
         # Add legend
         legend_elements = [
-            Patch(facecolor='black', edgecolor='black', label='Hyperedge (R=0)'),
-            Patch(facecolor='red', edgecolor='red', label='Hyperedge (R=1)'),
+            Patch(facecolor='black', edgecolor='black', label='Edge (R=0)'),
+            Patch(facecolor='red', edgecolor='red', label='Edge (R=1)'),
             Patch(facecolor='lightblue', edgecolor='black', label='Node'),
 
         ]

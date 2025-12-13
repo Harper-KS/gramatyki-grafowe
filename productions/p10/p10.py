@@ -58,7 +58,7 @@ class P10(Production):
         for e in matched_elements["edges"]:
             e.R = 1
 
-        print("Successfully applied P10! Marked edges for breaking.(E.R: 0 -> 1")
+        print("Successfully applied P10! Marked edges for breaking.(E.R: 0 -> 1)")
 
         return {
             'hyperedge': matched_elements["hyperedge"],
