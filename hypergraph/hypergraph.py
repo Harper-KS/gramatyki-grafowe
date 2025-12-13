@@ -55,8 +55,7 @@ class HyperGraph:
                 # Edge color: red for marked, black for rest
                 if edge.R:
                     color = 'red'
-                elif edge.R == 1:
-                    color = 'green'
+
                 else:
                     color = 'black'
 
@@ -104,7 +103,6 @@ class HyperGraph:
             Patch(facecolor='black', edgecolor='black', label='Hyperedge (R=0)'),
             Patch(facecolor='red', edgecolor='red', label='Hyperedge (R=1)'),
             Patch(facecolor='lightblue', edgecolor='black', label='Node'),
-            Patch(facecolor='green', edgecolor='black', label='Edge (R=1) - Marked'),
 
         ]
         plt.legend(handles=legend_elements, loc='upper right', fontsize=10)
