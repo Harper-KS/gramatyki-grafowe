@@ -2,15 +2,14 @@ from productions.production_base import Production
 
 class P10(Production):
     """
-    Production P10: marks edges of hexagonal element,
-    marked for refinement, for breaking,
-    it sets value of attribute R of each hyperedge with label E to 1
+    Production P10: Marks edges of a hexagonal element marked for refinement (R=1)
+    by setting the R attribute of each boundary edge (label E) to 1.
     """
 
 
     def __init__(self):
         super().__init__(
-            name="10",
+            name="P10",
             description="Mark edges of hexagonal element for breaking"
         )
 
@@ -26,8 +25,8 @@ class P10(Production):
             if not edge.is_hyperedge():
                 continue
 
-            # Check if it's a quadrilateral (label Q and 6 nodes)
-            if edge.label != "S" or len(edge.nodes) != 6:
+            # Check if it's a hexagonal (label "S", 6 nodes, and already marked for refinement (R=1))
+            if edge.label != "S" or len(edge.nodes) != 6 or edge.R != 1:
                 continue
 
 

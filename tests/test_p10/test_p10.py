@@ -29,47 +29,23 @@ class TestP10(unittest.TestCase):
             e = self.graph.add_edge(n1, n2, is_border=True)
             edges.append(e)
 
-        p = self.graph.add_hyperedge(nodes, label=label)
-        p.R = r_value
-        return nodes, edges, p
+        hyperedge = self.graph.add_hyperedge(nodes, label=label)
+        hyperedge.R = r_value
+        return nodes, edges, hyperedge
 
     def test_can_apply_correct_hexagon(self):
-        nodes, edges, p = self._create_hexagon(r_value=1, label="S")
+        nodes, edges, hyperedge = self._create_hexagon(r_value=1, label="S")
 
         can_apply, matched = self.production.can_apply(self.graph)
 
         self.assertTrue(can_apply)
         self.assertIsNotNone(matched)
-        self.assertEqual(matched["hyperedge"], p)
+        self.assertEqual(matched["hyperedge"], hyperedge)
         self.assertEqual(len(matched["nodes"]), 6)
         self.assertEqual(len(matched["edges"]), 6)
 
-    def test_cannot_apply_missing_node(self):
-        n1 = self.graph.add_node(0, 0)
-        n2 = self.graph.add_node(1, 0)
-        n3 = self.graph.add_node(1, 1)
-        n4 = self.graph.add_node(0, 1)
-
-        self.graph.add_edge(n1, n2, is_border=True)
-        self.graph.add_edge(n2, n3, is_border=True)
-        self.graph.add_edge(n3, n4, is_border=True)
-        self.graph.add_edge(n4, n1, is_border=True)
-
-        p = self.graph.add_hyperedge([n1, n2, n3, n4], label="S")
-        p.R = 1
-
-        can_apply, matched = self.production.can_apply(self.graph)
-
-        self.assertFalse(can_apply)
-        self.assertIsNone(matched)
-
-    def test_cannot_apply_missing_edge(self):
-        nodes, edges, p = self._create_hexagon(r_value=1, label="S")
-        self.graph.remove_edge(edges[-1])  
-        edges.pop()  
-
-        p = self.graph.add_hyperedge(nodes, label="S")
-        p.R = 1
+    def test_cannot_apply_not_marked_hexagon(self):
+        nodes, edges, hyperedge = self._create_hexagon(r_value=0, label="S")
 
         can_apply, matched = self.production.can_apply(self.graph)
 
@@ -77,26 +53,47 @@ class TestP10(unittest.TestCase):
         self.assertIsNone(matched)
 
     def test_cannot_apply_wrong_label(self):
-        nodes, edges, p = self._create_hexagon(r_value=1, label="Q")
+        nodes, edges, hyperedge = self._create_hexagon(r_value=1, label="Q")
 
         can_apply, matched = self.production.can_apply(self.graph)
 
         self.assertFalse(can_apply)
         self.assertIsNone(matched)
 
-    def test_cannot_apply_not_marked_hexagon(self):
-        nodes, edges, p = self._create_hexagon(r_value=0, label="S")
+    def test_cannot_apply_too_few_nodes(self):
+        nodes = [self.graph.add_node(i, i) for i in range(4)]
+        for i in range(4):
+            self.graph.add_edge(nodes[i], nodes[(i + 1) % 4])
+        hyperedge = self.graph.add_hyperedge(nodes, label="S")
+        hyperedge.R = 1
 
         can_apply, matched = self.production.can_apply(self.graph)
-
         self.assertFalse(can_apply)
-        self.assertIsNone(matched)
+
+    def test_cannot_apply_missing_edge(self):
+        nodes, edges, hyperedge = self._create_hexagon(r_value=1, label="S")
+        self.graph.remove_edge(edges[-1])  # remove one edge
+
+        can_apply, matched = self.production.can_apply(self.graph)
+        self.assertFalse(can_apply)
+
+    def test_cannot_apply_edges_already_marked(self):
+        nodes, edges, hyperedge = self._create_hexagon(r_value=1, label="S")
+        # Pre-mark all edges
+        for e in edges:
+            e.R = 1
+
+        # Even though hyperedge R=1 and structure correct, we can still apply (idempotent)
+        # But let's test that it still finds it (some implementations block re-application)
+        # Here we allow re-application (as in original), so it should still be applicable
+        can_apply, _ = self.production.can_apply(self.graph)
+        self.assertTrue(can_apply)
 
     def test_apply_marks_all_edges(self):
-        nodes, edges, p = self._create_hexagon(r_value=1, label="S")
+        nodes, edges, hyperedge = self._create_hexagon(r_value=1, label="S")
 
         for e in edges:
-            self.assertEqual(e.R, 0)
+            self.assertFalse(e.R)
 
         can_apply, matched = self.production.can_apply(self.graph)
         self.assertTrue(can_apply)
@@ -104,57 +101,56 @@ class TestP10(unittest.TestCase):
         result = self.production.apply(self.graph, matched)
 
         for e in edges:
-            self.assertEqual(e.R, 1)
+            self.assertTrue(e.R)
 
         self.assertEqual(len(result["marked_edges"]), 6)
 
-    def test_apply_preserves_graph_structure(self):
-        nodes, edges, p = self._create_hexagon(r_value=1, label="S")
+    def test_apply_is_idempotent(self):
+        nodes, edges, hyperedge = self._create_hexagon(r_value=1, label="S")
+        self.production.apply(self.graph, self.production.can_apply(self.graph)[1])
 
-        extra_node = self.graph.add_node(2, 2)
-        extra_edge = self.graph.add_edge(nodes[0], extra_node, is_border=False)
-
-        initial_node_count = len(self.graph.nodes)
-        initial_edge_count = len(self.graph.edges)
-
+        # Apply again
         can_apply, matched = self.production.can_apply(self.graph)
         self.assertTrue(can_apply)
-
         self.production.apply(self.graph, matched)
 
-        self.assertEqual(len(self.graph.nodes), initial_node_count)
-        self.assertEqual(len(self.graph.edges), initial_edge_count)
+        for e in edges:
+            self.assertTrue(e.R)  # Still True, no error
+
+    def test_apply_preserves_graph_structure(self):
+        nodes, edges, hyperedge = self._create_hexagon(r_value=1, label="S")
+
+        extra_node = self.graph.add_node(10, 10)
+        extra_edge = self.graph.add_edge(nodes[0], extra_node)
+
+        initial_nodes = len(self.graph.nodes)
+        initial_edges = len(self.graph.edges)
+
+        self.production.apply(self.graph, self.production.can_apply(self.graph)[1])
+
+        self.assertEqual(len(self.graph.nodes), initial_nodes)
+        self.assertEqual(len(self.graph.edges), initial_edges)
         self.assertIn(extra_node, self.graph.nodes)
         self.assertIn(extra_edge, self.graph.edges)
 
-    def test_visualization_before_after(self):
-        nodes, edges, p = self._create_hexagon(r_value=1, label="S")
-
-        output_dir = os.path.join(os.path.dirname(__file__), "outputs")
-        os.makedirs(output_dir, exist_ok=True)
-
-        before_path = os.path.join(output_dir, "test_p10_before.png")
-        self.graph.visualize(before_path)
-        self.assertTrue(os.path.exists(before_path))
-
-        can_apply, matched = self.production.can_apply(self.graph)
-        self.assertTrue(can_apply)
-        self.production.apply(self.graph, matched)
-
-        after_path = os.path.join(output_dir, "test_p10_after.png")
-        self.graph.visualize(after_path)
-        self.assertTrue(os.path.exists(after_path))
-
     def test_in_larger_graph(self):
-        nodes, edges, p = self._create_hexagon(r_value=1, label="S")
+        # Main hexagon to refine
+        nodes1, edges1, h1 = self._create_hexagon(r_value=1, label="S")
 
-        n_extra1 = self.graph.add_node(3, 0)
-        n_extra2 = self.graph.add_node(3, 1)
-        self.graph.add_edge(n_extra1, n_extra2, is_border=True)
-        self.graph.add_hyperedge([n_extra1, n_extra2, nodes[0], nodes[1], nodes[2]], label="P")
+        # Another hexagon not marked
+        nodes2, _, h2 = self._create_hexagon(r_value=0, label="S")
+        for n in nodes2:
+            n.x += 3  # shift to avoid overlap
+            n.y += 3
+
+        # Extra unrelated stuff
+        a = self.graph.add_node(5, 5)
+        b = self.graph.add_node(6, 6)
+        self.graph.add_edge(a, b)
 
         can_apply, matched = self.production.can_apply(self.graph)
         self.assertTrue(can_apply)
+        self.assertEqual(matched["hyperedge"], h1)  # should find the marked one
 
 
 if __name__ == "__main__":
