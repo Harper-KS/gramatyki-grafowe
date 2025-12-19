@@ -24,7 +24,7 @@ n1, n2, n3, n4, n5, n6 = [
 borders = {(n1, n2), (n2, n3), (n3, n4), (n4, n5), (n5, n6), (n6, n1)}
 edges = []
 for i in borders:
-    e = graph1.add_edge(i[0], i[1])
+    e = graph1.add_edge(i[0], i[1], is_border=True)
     e.R = 0
     edges.append(e)
 
@@ -32,7 +32,6 @@ h = graph1.add_hyperedge([n1,n2,n3,n4,n5,n6], label="S")
 h.R = 0
 # Before
 graph1.visualize(os.path.join(output_dir, "example_p9_before.png"))
-
 can_apply, matched = production.can_apply(graph1)
 if can_apply:
     production.apply(graph1, matched)
@@ -55,12 +54,12 @@ borders = {(n1, n2), (n2, n3), (n3, n7), (n7, n8), (n8, n9), (n9, n5), (n5, n6),
 inner = {(n4, n5), (n3, n4), (n4, n8)}
 edges = []
 for i in borders:
-    e = graph2.add_edge(i[0], i[1])
+    e = graph2.add_edge(i[0], i[1], is_border=True)
     e.R = 0
     edges.append(e)
 
 for i in inner:
-    e = graph2.add_edge(i[0], i[1], is_border=False, label="E")
+    e = graph2.add_edge(i[0], i[1], label="E")
     e.R = 0
     edges.append(e)
 
