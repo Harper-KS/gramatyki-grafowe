@@ -32,14 +32,18 @@ def create_initial_graph():
         e.R = 0
         edges.append(e)
 
-    # pięciokąt
     p1 = graph.add_hyperedge([n2, n3, n4, n9, n10], label="P")
     p1.R = 0
 
     q1 = graph.add_hyperedge([n1, n2, n8, n9], label="Q")
     q2 = graph.add_hyperedge([n8, n9, n10, n11], label="Q")
+    # q3 = graph.add_hyperedge([n4, n5, n10, n11], label="Q")
     q1.R = 0
     q2.R = 0
+    # q3.R = 0
+
+    # h1 = graph.add_hyperedge([n1, n5, n6, n7, n8, n11], label="S")
+    # h1.R = 0
 
     return graph
 
