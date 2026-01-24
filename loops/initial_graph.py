@@ -32,6 +32,7 @@ def create_initial_graph():
         e.R = 0
         edges.append(e)
 
+    # pięciokąt
     p1 = graph.add_hyperedge([n2, n3, n4, n9, n10], label="P")
     p1.R = 0
 

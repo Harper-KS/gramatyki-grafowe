@@ -16,14 +16,19 @@ class P7(Production):
         )
 
     def can_apply(self, graph, hyperedge=None):
-
+        # print("start P7")
         hyperedges_to_check = [hyperedge] if hyperedge else graph.edges
+        # print(hyperedge)
+        # print(graph.edges)
+        # print(hyperedges_to_check)
 
         for edge in hyperedges_to_check:
             if not edge.is_hyperedge():
+                # print("1")
                 continue
 
             if edge.label != "P" or len(edge.nodes) != 5 or edge.R != 1:
+                # print("2")
                 continue
 
             nodes = edge.nodes
@@ -33,17 +38,34 @@ class P7(Production):
                 node1 = nodes[i]
                 node2 = nodes[(i + 1) % 5]
                 found_edge = graph.get_edge_between(node1, node2)
-                if found_edge is None or found_edge.label != "E":
-                    break
+                # if found_edge is None or found_edge.label != "E":
+                #     print("3")
+                #     break
+                edges_found.append(found_edge)
+                n3 = nodes[(i + 2) % 5]
+                found_edge_3 = graph.get_edge_between(node1, n3)
+                n4 = nodes[(i + 3) % 5]
+                found_edge_4 = graph.get_edge_between(node1, n4)
+                n5 = nodes[(i + 4) % 5]
+                found_edge_5 = graph.get_edge_between(node1, n5)
+                edges_found.append(found_edge_3)
+                edges_found.append(found_edge_4)
+                edges_found.append(found_edge_5)
                 edges_found.append(found_edge)
 
+            edges_found = [edge for edge in edges_found if edge is not None]
+            unique_edges = list(dict.fromkeys(edges_found))
+            edges_found = unique_edges
+
             if len(edges_found) == 5:
+                # print("4")
                 return True, {
                     "hyperedge": edge,
                     "nodes": nodes,
                     "edges": edges_found,
                 }
-
+        # print("5")
+        # print("end P7")
         return False, None
 
     def apply(self, graph, matched_elements):

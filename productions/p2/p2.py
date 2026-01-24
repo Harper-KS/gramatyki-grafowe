@@ -12,12 +12,16 @@ class P2(Production):
 
     def can_apply(self, graph, **kwargs):
         for edge in graph.edges:
-            if not edge.is_hyperedge() and edge.label == "E" and edge.R == 1 and not edge.is_border:
+            # print(1)
+            # print(edge)
+            if not edge.is_hyperedge() and edge.label == "E" and not edge.is_border and edge.R == 1: # and edge.R == 1
+                # print(2)
                 n1, n2 = edge.nodes
                 n1_edges = []
                 n2_edges = []
                 for e in graph.edges:
                     if e == edge or e.is_hyperedge():
+                        # print(3)
                         continue
                     if n1 in e.nodes:
                         n1_edges.append(e)
@@ -25,6 +29,7 @@ class P2(Production):
                         n2_edges.append(e)
                 for n1_edge in n1_edges:
                     for n2_edge in n2_edges:
+                        # print(4)
                         if len(set(n1_edge.nodes) | set(n2_edge.nodes)) == 3:
                             return True, {
                                 "edge_to_remove": edge,

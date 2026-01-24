@@ -52,8 +52,10 @@ def get_closest_hyperedge_index(production, target_node):
     Returns:
         int: Index of closest hyperedge, or 0 if none found
     """
+    # print(2)
     if target_node is None:
         return 0
+    # print(3)
 
     candidates = []
     for edge in g.edges:
@@ -101,8 +103,11 @@ def apply_n_draw(production, index=None):
         index: Index of element to apply to. If None, uses closest to TARGET_NODE
     """
     global ITERATION
-
+    # print(1)
+    # print(TARGET_NODE)
     # Auto-select index based on target node if not specified
+    # print(TARGET_NODE)
+    print(TARGET_NODE, index)
     if index is None and TARGET_NODE is not None:
         index = get_closest_hyperedge_index(production, TARGET_NODE)
         print(f"  Auto-selected index {index} (closest to target node)")
@@ -117,15 +122,29 @@ def apply_n_draw(production, index=None):
         if edge.is_hyperedge():
             # Try to check if this production would accept this edge
             try:
-                can_apply, _ = production.can_apply(g, hyperedge=edge)
+                # print(g)
+                # print(edge)
+                # for e in edge.nodes:
+                #     print(e)
+                # print()
+                print(edge)
+                can_apply, edge_c = production.can_apply(g, hyperedge=edge)
+                print(can_apply)
+                # print("outside can_apply")
+                # print(can_apply)
+                # print(edge_c)
                 if can_apply:
                     candidates.append(edge)
             except TypeError:
                 # Production doesn't support hyperedge parameter
                 # Just apply it normally without filtering
                 break
-
+    # print("---------------before candidates---------------")
+    # print(candidates)
+    # print(index, len(candidates))
     # Select by index if we have candidates
+    # for c in candidates:
+    #     print(c)
     if candidates and 0 <= index < len(candidates):
         hyperedge = candidates[index]
 
@@ -157,6 +176,9 @@ def apply_while(productions):
         for prod in productions:
             while True:
                 can_apply, matched = prod.can_apply(g)
+                # if str(prod) == "Production P2: Remove broken edge":
+                #     print(can_apply)
+                #     print(matched)
                 if can_apply:
                     all_failed = False
                     print(f"[{ITERATION}] Applying {prod.name}...")
@@ -179,19 +201,56 @@ if TARGET_NODE:
 else:
     print("\nWarning: Target node not found, using default indexing\n")
 
-prods_chain = [ P3(), P1(), P4(), P2(), P3()]
+# for cos in g.nodes:
+#     print(cos)
+#
+#
+# for cos in g.edges:
+#     print(cos)
 
-apply_n_draw(P6())
+# print(TARGET_NODE)
+
+prods_chain = [P3(), P1(), P4(), P2(), P3()] # <- to do ilo konta???
+
+# 0
+# 1
+# 3 X 4
+# 1
+# 2 X 4
+# 5
+
+apply_n_draw(P6()) # czy do 5-kąta
 apply_n_draw(P7())
+apply_while([P3(), P4()])
 apply_n_draw(P8())
 apply_while(prods_chain)
-apply_n_draw(P0())
-apply_n_draw(P1())
+apply_while([P2()])
+apply_n_draw(P0(),0)
+apply_n_draw(P1(),0)
+apply_while([P4()])
+apply_while([P2()])
+apply_while([P3()])
 apply_n_draw(P5())
-apply_while(prods_chain)
-apply_n_draw(P0() )
-apply_n_draw(P1())
+# apply_while(prods_chain)
+apply_n_draw(P0(),0)
+apply_n_draw(P1(),0)
+apply_while([P4()])
+apply_while([P2()])
+apply_while([P3()])
 apply_n_draw(P5())
-apply_while(prods_chain)
+apply_n_draw(P0(), 10)
+apply_n_draw(P1(),10)
+apply_while([P4()])
+apply_while([P2()])
+apply_while([P3()])
+apply_n_draw(P5())
+# apply_n_draw(P5())
+# apply_while(prods_chain)
+# for cos in g.nodes:
+#     print(cos)
+#
+for cos in g.edges:
+    if cos.is_hyperedge():
+        print(cos)
 print(f"\nGenerated {ITERATION} iterations in {output_dir}")
 print("Done!")
