@@ -63,23 +63,6 @@ class P5(Production):
                 unique_edges = list(dict.fromkeys(midpoints))
                 midpoints = unique_edges
                 edges = midpoints
-                # edges = []
-                # for i in range(4):
-                #     node_a = nodes[i]
-                #     node_b = nodes[(i + 1) % 4]
-                #
-                #     mid_x, mid_y = (node_a.x + node_b.x) / 2, (node_a.y + node_b.y) / 2
-                #
-                #     found_mid = None
-                #     for node in graph.nodes:
-                #         if abs(node.x - mid_x) < EPSILON and abs(node.y - mid_y) < EPSILON:
-                #             found_mid = node
-                #             break
-                #
-                #     if not found_mid:
-                #         break
-                #
-                #     edges.append(found_mid)
 
                 if len(edges) == 4:
                     return True, {
@@ -94,7 +77,6 @@ class P5(Production):
         hyperedge = matched_elements['hyperedge']
         n = matched_elements['nodes']
         m = matched_elements['edges']
-        # print("tutaj")
 
         graph.remove_edge(hyperedge)
 
@@ -103,21 +85,14 @@ class P5(Production):
 
         sorted_nodes_n = sort_nodes_clockwise(n, center_node)
         sorted_nodes_m = sort_nodes_clockwise(m, center_node)
-        # print("elo elo 320")
-        # for node in sorted_nodes_n:
-        #     print(node)
-        # print()
-        # for node in sorted_nodes_m:
-        #     print(node)
-        # print()
+
         shift = 0
         node_1 = sorted_nodes_n[0]
         node_2 = sorted_nodes_n[1]
-        # print(node_1)
-        # print(node_2)
+
         x_b = (node_2.x + node_1.x) / 2
         y_b = (node_2.y + node_1.y) / 2
-        # print(x_b, y_b)
+
         while True:
             print(sorted_nodes_m[shift])
             if ((x_b - 0.1 < sorted_nodes_m[shift].x < x_b + 0.1)
@@ -125,7 +100,7 @@ class P5(Production):
                 break
             else:
                 shift += 1
-        # print("shift" + str(shift))
+
         for i in range(4):
             edge = graph.add_edge(m[i], center_node)
             edges.append(edge)

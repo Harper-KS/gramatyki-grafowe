@@ -45,7 +45,6 @@ class P8(Production):
                             break
 
                     midpoints.append(found_mid)
-            print("midpoints")
             midpoints = [edge for edge in midpoints if edge is not None]
             unique_edges = list(dict.fromkeys(midpoints))
             midpoints = unique_edges
@@ -57,9 +56,6 @@ class P8(Production):
                 node2 = nodes[(i + 1) % 5]
                 
                 found_edge = graph.get_edge_between(node1, node2)
-                # if found_edge is None:
-                #     found_edges.append(found_edge)
-                #
                 found_edges.append(found_edge)
                 n3 = nodes[(i + 2) % 5]
                 found_edge_3 = graph.get_edge_between(node1, n3)
@@ -71,13 +67,6 @@ class P8(Production):
                 found_edges.append(found_edge_4)
                 found_edges.append(found_edge_5)
 
-            # edges_found = [edge for edge in found_edges if edge is not None]
-            # unique_edges = list(dict.fromkeys(edges_found))
-            # found_edges = unique_edges
-            print("in P8 (can_apply)")
-            # print(len(found_edges))
-            # for f in found_edges:
-            #     print(f)
             if len(midpoints) == 5:
                 return True, {
                     'pentagon_hyperedge': edge,
@@ -94,7 +83,6 @@ class P8(Production):
         nodes = matched_elements['nodes']
         edges = matched_elements['edges']
         midpoints = matched_elements['midpoints']
-
         
         graph.remove_edge(pentagon_he)
 
@@ -105,11 +93,6 @@ class P8(Production):
         # dodajemy centrale V
         centroid_node = graph.add_node(centroid_x, centroid_y)
         print("in P8 (apply)")
-        # for cos in graph.nodes:
-        #     print(cos)
-        #
-        # if midpoints is None:
-        #     midpoints = ...
             
         # dadajemy krawedz pomiedzy srodiem a midpointami
         for midpoint in midpoints:
@@ -119,19 +102,10 @@ class P8(Production):
         
         # dodajemy quady
         new_quads = []
-        # for v in nodes:
-        #     print(v)
-        #
-        # for m in midpoints:
-        #     print(m)
-        # print()
+
         nodes[3], nodes[4] = nodes[4], nodes[3]
         midpoints[0], midpoints[1] = midpoints[1], midpoints[0]
 
-        # for v in nodes:
-        #     print(v)
-        # for m in midpoints:
-        #     print(m)
         for i in range(5):
             vertex = nodes[i]
             mid_next = midpoints[i]

@@ -30,13 +30,6 @@ class P1(Production):
             node2 = nodes[(i + 1) % 4]
             found_edge = graph.get_edge_between(node1, node2)
 
-            # if found_edge is None:
-            #     break
-            #
-            # # Check if edge is not already marked
-            # if found_edge.R == 1:
-            #     break
-
             edges_found.append(found_edge)
             n3 = nodes[(i + 2) % 4]
             found_edge_3 = graph.get_edge_between(node1, n3)
